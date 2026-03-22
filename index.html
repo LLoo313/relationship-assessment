@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>亲密关系稳定性评估</title>
+<style>
+  :root {
+    --primary: #6C5CE7;
+    --primary-light: #A29BFE;
+    --accent: #FD79A8;
+    --accent-light: #FDCB6E;
+    --bg: #0F0E17;
+    --card: #1A1A2E;
+    --card-hover: #222240;
+    --text: #FFFFFE;
+    --text-secondary: #B8B8D0;
+    --success: #00B894;
+    --warning: #FDCB6E;
+    --danger: #E17055;
+    --gradient-1: linear-gradient(135deg, #6C5CE7, #A29BFE);
+    --gradient-2: linear-gradient(135deg, #FD79A8, #FDCB6E);
+    --gradient-3: linear-gradient(135deg, #00B894, #00CEC9);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  .bg-animation {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bg-animation .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: float 20s ease-in-out infinite;
+  }
+  .bg-animation .orb:nth-child(1) {
+    width: 600px; height: 600px;
+    background: var(--primary);
+    top: -200px; left: -100px;
+    animation-delay: 0s;
+  }
+  .bg-animation .orb:nth-child(2) {
+    width: 400px; height: 400px;
+    background: var(--accent);
+    bottom: -100px; right: -100px;
+    animation-delay: -7s;
+  }
+  .bg-animation .orb:nth-child(3) {
+    width: 300px; height: 300px;
+    background: #00CEC9;
+    top: 50%; left: 50%;
+    animation-delay: -14s;
+  }
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(50px, -80px) scale(1.1); }
+    50% { transform: translate(-30px, 50px) scale(0.95); }
+    75% { transform: translate(80px, 30px) scale(1.05); }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* ===== Landing Page ===== */
+  #landing {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  #landing .logo {
+    font-size: 64px;
+    margin-bottom: 20px;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  #landing h1 {
+    font-size: 2.5em;
+    background: var(--gradient-1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+  #landing .subtitle {
+    font-size: 1.1em;
+    color: var(--text-secondary);
+    max-width: 600px;
+    line-height: 1.8;
+    margin-bottom: 40px;
+  }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 40px;
+  }
+  .feature-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 24px 16px;
+    text-align: center;
+  }
+  .feature-card .icon { font-size: 32px; margin-bottom: 8px; }
+  .feature-card h3 { font-size: 0.95em; margin-bottom: 4px; }
+  .feature-card p { font-size: 0.8em; color: var(--text-secondary); }
+
+  .btn-start {
+    background: var(--gradient-1);
+    border: none;
+    color: white;
+    padding: 18px 48px;
+    font-size: 1.15em;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 600;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+  }
+  .btn-start:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(108, 92, 231, 0.6);
+  }
+
+  .disclaimer {
+    margin-top: 30px;
+    font-size: 0.75em;
+    color: rgba(184,184,208,0.6);
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  /* ===== Quiz Section ===== */
+  #quiz { display: none; padding-top: 30px; padding-bottom: 100px; }
+
+  .progress-container {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(15, 14, 23, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 16px 20px;
+  }
+  .progress-info {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .progress-info .dim-label {
+    font-size: 0.85em;
+    color: var(--primary-light);
+    font-weight: 500;
+  }
+  .progress-info .count {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+  }
+  .progress-bar {
+    max-width: 800px;
+    margin: 0 auto;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--gradient-1);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .question-card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 36px 32px;
+    margin-top: 80px;
+    margin-bottom: 24px;
+    animation: slideIn 0.4s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-number {
+    font-size: 0.8em;
+    color: var(--primary-light);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .question-text {
+    font-size: 1.15em;
+    line-height: 1.7;
+    margin-bottom: 28px;
+    font-weight: 400;
+  }
+
+  .likert-scale {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .likert-option {
+    flex: 1;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .likert-option input { display: none; }
+  .likert-option label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 8px;
+    border-radius: 14px;
+    border: 2px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+    transition: all 0.25s;
+    background: rgba(255,255,255,0.02);
+  }
+  .likert-option label:hover {
+    border-color: var(--primary-light);
+    background: rgba(108, 92, 231, 0.1);
+  }
+  .likert-option input:checked + label {
+    border-color: var(--primary);
+    background: rgba(108, 92, 231, 0.2);
+    box-shadow: 0 0 20px rgba(108, 92, 231, 0.15);
+  }
+  .likert-option .num {
+    font-size: 1.3em;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--primary-light);
+  }
+  .likert-option .lbl {
+    font-size: 0.7em;
+    color: var(--text-secondary);
+    line-height: 1.3;
+  }
+
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .btn-nav {
+    padding: 14px 32px;
+    border-radius: 12px;
+    border: none;
+    font-size: 0.95em;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .btn-prev {
+    background: rgba(255,255,255,0.08);
+    color: var(--text-secondary);
+  }
+  .btn-prev:hover { background: rgba(255,255,255,0.12); }
+  .btn-next {
+    background: var(--gradient-1);
+    color: white;
+    margin-left: auto;
+    box-shadow: 0 2px 12px rgba(108,92,231,0.3);
+  }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(108,92,231,0.5); }
+  .btn-next:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* ===== Results ===== */
+  #results { display: none; padding: 40px 20px 60px; }
+
+  .results-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .results-header .big-icon { font-size: 64px; margin-bottom: 16px; }
+  .results-header h2 {
+    font-size: 2em;
+    margin-bottom: 8px;
+  }
+
+  .overall-score {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .score-circle {
+    width: 180px; height: 180px;
+    margin: 0 auto 20px;
+    position: relative;
+  }
+  .score-circle svg {
+    width: 100%; height: 100%;
+    transform: rotate(-90deg);
+  }
+  .score-circle .bg { stroke: rgba(255,255,255,0.08); }
+  .score-circle .fill {
+    stroke-dasharray: 502;
+    stroke-dashoffset: 502;
+    transition: stroke-dashoffset 1.5s ease;
+  }
+  .score-circle .score-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .score-circle .score-num {
+    font-size: 2.8em;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .score-circle .score-label {
+    font-size: 0.8em;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+  .risk-level {
+    font-size: 1.2em;
+    font-weight: 600;
+    padding: 8px 24px;
+    border-radius: 50px;
+    display: inline-block;
+  }
+
+  .dimension-results {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .dim-card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.2s;
+  }
+  .dim-card:hover { background: var(--card-hover); }
+  .dim-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .dim-header h3 { font-size: 1em; display: flex; align-items: center; gap: 8px; }
+  .dim-score-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+  }
+  .dim-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .dim-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+    width: 0%;
+  }
+  .dim-desc {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .interpretation {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 40px;
+  }
+  .interpretation h3 {
+    font-size: 1.2em;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .interpretation p {
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-bottom: 12px;
+    font-size: 0.95em;
+  }
+  .interpretation ul {
+    padding-left: 20px;
+    margin-bottom: 12px;
+  }
+  .interpretation li {
+    color: var(--text-secondary);
+    line-height: 1.8;
+    font-size: 0.9em;
+    margin-bottom: 4px;
+  }
+
+  .references {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 40px;
+  }
+  .references h3 {
+    font-size: 1.1em;
+    margin-bottom: 16px;
+  }
+  .ref-list {
+    list-style: none;
+    padding: 0;
+  }
+  .ref-list li {
+    font-size: 0.8em;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 10px;
+    padding-left: 20px;
+    position: relative;
+  }
+  .ref-list li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 10px;
+    width: 6px; height: 6px;
+    background: var(--primary-light);
+    border-radius: 50%;
+  }
+
+  .btn-restart {
+    display: block;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--text);
+    padding: 16px 40px;
+    border-radius: 50px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-restart:hover {
+    background: rgba(255,255,255,0.12);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 600px) {
+    #landing h1 { font-size: 1.8em; }
+    .likert-option label { padding: 12px 4px; }
+    .likert-option .num { font-size: 1.1em; }
+    .likert-option .lbl { font-size: 0.6em; }
+    .question-card { padding: 24px 20px; }
+    .feature-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-animation">
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+</div>
+
+<!-- ===== LANDING ===== -->
+<div class="container" id="landing">
+  <div class="logo">🔬</div>
+  <h1>亲密关系稳定性<br>科学评估</h1>
+  <p class="subtitle">
+    本测评基于依恋理论、投资模型、少数群体压力模型等多项经典心理学理论，
+    结合同性伴侣关系研究文献设计。通过 50 道题目，从 10 个维度综合评估你们关系的稳定性与潜在风险因素。
+  </p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon">📚</div>
+      <h3>学术论文支撑</h3>
+      <p>基于 15+ 篇经典文献</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📊</div>
+      <h3>10 大维度</h3>
+      <p>全面覆盖关系核心要素</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🏳️‍🌈</div>
+      <h3>同性伴侣适用</h3>
+      <p>考量少数群体独特压力</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🔒</div>
+      <h3>完全匿名</h3>
+      <p>数据仅保留在你的浏览器</p>
+    </div>
+  </div>
+
+  <button class="btn-start" onclick="startQuiz()">开始评估</button>
+
+  <p class="disclaimer">
+    声明：本测评仅供参考，不构成任何心理诊断或医学建议。如有关系困扰，请寻求专业心理咨询师的帮助。
+    所有数据仅在本地浏览器中运算，不会上传至任何服务器。
+  </p>
+</div>
+
+<!-- ===== QUIZ ===== -->
+<div id="quiz">
+  <div class="progress-container">
+    <div class="progress-info">
+      <span class="dim-label" id="dimLabel"></span>
+      <span class="count" id="progressCount"></span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="question-card" id="questionCard">
+      <div class="question-number" id="questionNumber"></div>
+      <div class="question-text" id="questionText"></div>
+      <div class="likert-scale" id="likertScale"></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn-nav btn-prev" id="btnPrev" onclick="prevQuestion()">← 上一题</button>
+      <button class="btn-nav btn-next" id="btnNext" onclick="nextQuestion()">下一题 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RESULTS ===== -->
+<div id="results">
+  <div class="container">
+    <div class="results-header">
+      <div class="big-icon" id="resultIcon"></div>
+      <h2 id="resultTitle"></h2>
+      <p style="color:var(--text-secondary)" id="resultSubtitle"></p>
+    </div>
+
+    <div class="overall-score">
+      <div class="score-circle">
+        <svg viewBox="0 0 180 180">
+          <circle class="bg" cx="90" cy="90" r="80" fill="none" stroke-width="8"/>
+          <circle class="fill" id="scoreFill" cx="90" cy="90" r="80" fill="none" stroke-width="8" stroke-linecap="round"/>
+        </svg>
+        <div class="score-text">
+          <div class="score-num" id="scoreNum">0</div>
+          <div class="score-label">稳定性指数</div>
+        </div>
+      </div>
+      <div class="risk-level" id="riskLevel"></div>
+    </div>
+
+    <div class="dimension-results" id="dimensionResults"></div>
+
+    <div class="interpretation" id="interpretation"></div>
+
+    <div class="references">
+      <h3>📚 学术参考文献</h3>
+      <ul class="ref-list">
+        <li>Rusbult, C. E. (1983). A longitudinal test of the investment model: The development (and deterioration) of satisfaction and commitment in heterosexual involvements. <em>Journal of Personality and Social Psychology, 45</em>(1), 101–117.</li>
+        <li>Brennan, K. A., Clark, C. L., & Shaver, P. R. (1998). Self-report measurement of adult attachment: An integrative overview. In J. A. Simpson & W. S. Rholes (Eds.), <em>Attachment theory and close relationships</em> (pp. 46–76). Guilford Press.</li>
+        <li>Mark, K. P., Janssen, E., & Finn, P. (2011). Infidelity in heterosexual couples: Demographic, interpersonal, and personality-related predictors of extradyadic sex. <em>Archives of Sexual Behavior, 40</em>(5), 971–982.</li>
+        <li>Kurdek, L. A. (2004). Are gay and lesbian cohabiting couples really different from heterosexual married couples? <em>Journal of Marriage and Family, 66</em>(4), 880–900.</li>
+        <li>Kurdek, L. A. (2005). What do we know about gay and lesbian couples? <em>Current Directions in Psychological Science, 14</em>(5), 251–254.</li>
+        <li>Meyer, I. H. (2003). Prejudice, social stress, and mental health in lesbian, gay, and bisexual populations: Conceptual issues and research evidence. <em>Psychological Bulletin, 129</em>(5), 674–697.</li>
+        <li>Hoff, C. C., & Beougher, S. C. (2010). Sexual agreements among gay male couples. <em>Archives of Sexual Behavior, 39</em>(3), 774–787.</li>
+        <li>Blow, A. J., & Hartnett, K. (2005). Infidelity trends and patterns: A meta-analytic review. <em>Journal of Family Therapy, 27</em>(2), 227–250.</li>
+        <li>Simpson, J. A., & Gangestad, S. W. (1991). Individual differences in sociosexuality: Evidence for convergent and discriminant validity. <em>Journal of Personality and Social Psychology, 60</em>(6), 870–883.</li>
+        <li>Allen, E. S., & Baucom, D. H. (2004). Adult attachment and patterns of extradyadic involvement. <em>Family Process, 43</em>(4), 467–488.</li>
+        <li>Spanier, G. B. (1976). Measuring dyadic adjustment: New scales for assessing the quality of marriage and similar dyads. <em>Journal of Marriage and the Family, 38</em>(1), 15–28.</li>
+        <li>Rostosky, S. S., & Riggle, E. D. B. (2017). Same-sex couple relationship strengths: A review and synthesis of the empirical literature (2000–2016). <em>Psychology of Sexual Orientation and Gender Diversity, 4</em>(1), 1–13.</li>
+        <li>Christensen, A., & Heavey, C. L. (1990). Gender and social structure in the demand/withdraw pattern of marital conflict. <em>Journal of Personality and Social Psychology, 59</em>(1), 73–81.</li>
+        <li>Zuckerman, M. (1994). <em>Behavioral expressions and biosocial bases of sensation seeking</em>. Cambridge University Press.</li>
+        <li>Gottman, J. M., et al. (2003). Correlates of gay and lesbian couples' relationship satisfaction and relationship dissolution. <em>Journal of Homosexuality, 45</em>(1), 23–43.</li>
+      </ul>
+    </div>
+
+    <button class="btn-restart" onclick="restart()">重新测评</button>
+  </div>
+</div>
+
+<script>
+// ===== QUESTION DATA =====
+// Each question has: text, dimension, reverse (if true, scoring is inverted for risk calculation)
+// Dimensions map to academic constructs
+const dimensions = [
+  { id: 'satisfaction', name: '关系满意度', icon: '💫',
+    theory: '二元调适量表 (Spanier, 1976)',
+    lowDesc: '你们的关系满意度较低，这是关系不稳定的核心预测因素。研究表明，低满意度与寻求外部情感/亲密关系的可能性显著相关 (Mark et al., 2011)。',
+    highDesc: '你们的关系满意度较高，这是维持关系稳定的最重要保护因素之一。高满意度的伴侣通常更少受到外部吸引的影响 (Rusbult, 1983)。' },
+  { id: 'attachment', name: '依恋安全感', icon: '🔗',
+    theory: '成人依恋理论 (Brennan et al., 1998)',
+    lowDesc: '你表现出较高的依恋焦虑或回避倾向。不安全依恋与关系中的信任危机和越界行为存在显著关联 (Allen & Baucom, 2004)。',
+    highDesc: '你展现出较为安全的依恋风格，能够在亲密与独立之间取得平衡。安全依恋是关系稳定性的重要基石 (Brennan et al., 1998)。' },
+  { id: 'investment', name: '关系投入度', icon: '🏗️',
+    theory: '投资模型 (Rusbult, 1983)',
+    lowDesc: '你在关系中的投入程度较低。根据投资模型，低投入意味着离开关系的成本较小，这会降低维持承诺的动力 (Rusbult, 1983)。',
+    highDesc: '你在关系中有很高的投入度。深度的时间、情感和资源投入会增强承诺感，降低关系破裂的风险 (Rusbult, 1983)。' },
+  { id: 'alternatives', name: '替代选择感知', icon: '👥',
+    theory: '投资模型 (Rusbult, 1983)',
+    lowDesc: '你对关系外部替代选择的感知较高。研究表明，当个体认为存在更好的替代伴侣时，当前关系的稳定性会受到显著威胁 (Rusbult, 1983)。',
+    highDesc: '你对外部替代选择的关注度较低，这意味着你对当前关系的专注度较高，关系稳定性更强。' },
+  { id: 'communication', name: '沟通质量', icon: '💬',
+    theory: '沟通模式问卷 (Christensen & Heavey, 1990)',
+    lowDesc: '你们的沟通存在一些困难。不良的沟通模式（如追-逃模式）是关系不满和潜在越界行为的重要前因 (Gottman et al., 2003)。',
+    highDesc: '你们有良好的沟通基础。高质量的沟通能力是同性伴侣关系中最重要的保护因素之一 (Gottman et al., 2003)。' },
+  { id: 'minority_stress', name: '社会支持', icon: '🌍',
+    theory: '少数群体压力模型 (Meyer, 2003)',
+    lowDesc: '你们面临较高的外部压力和较低的社会支持。少数群体压力会对关系质量产生负面影响，增加关系不稳定的风险 (Meyer, 2003)。',
+    highDesc: '你们拥有良好的社会支持系统。外部支持能缓冲少数群体压力对关系的负面影响 (Meyer, 2003; Rostosky & Riggle, 2017)。' },
+  { id: 'intimacy', name: '情感亲密度', icon: '❤️',
+    theory: '关系满意度研究 (Kurdek, 2004, 2005)',
+    lowDesc: '你们之间的情感亲密度有待加强。缺乏情感连接可能导致个体从关系外部寻求情感满足 (Kurdek, 2005)。',
+    highDesc: '你们拥有较强的情感亲密关系。深度的情感连接是预防关系问题的核心保护因素 (Kurdek, 2004)。' },
+  { id: 'boundaries', name: '关系边界共识', icon: '📋',
+    theory: '性协议研究 (Hoff & Beougher, 2010)',
+    lowDesc: '你们在关系边界的认知上可能存在不一致。关于"什么是可以接受的行为"的认知差异是同性伴侣关系中冲突和越界的主要来源 (Hoff & Beougher, 2010)。',
+    highDesc: '你们对关系边界有清晰的共识。明确的关系协议和一致的边界认知显著降低误解和越界的可能性 (Hoff & Beougher, 2010)。' },
+  { id: 'sensation', name: '新奇寻求倾向', icon: '🎲',
+    theory: '感觉寻求理论 (Zuckerman, 1994) / 社会性取向 (Simpson & Gangestad, 1991)',
+    lowDesc: '你有较高的新奇寻求和开放性倾向。高感觉寻求和非限制性社会性取向与寻求多元亲密关系的可能性显著相关 (Simpson & Gangestad, 1991)。',
+    highDesc: '你的新奇寻求倾向在正常范围内。较为稳定的个人特质有助于维持专注和稳定的伴侣关系。' },
+  { id: 'trust', name: '信任与承诺', icon: '🤝',
+    theory: '出轨预测因素综述 (Blow & Hartnett, 2005)',
+    lowDesc: '你们之间的信任和承诺水平有待提高。低信任和低承诺是关系不稳定和出轨行为的最直接预测因素 (Blow & Hartnett, 2005)。',
+    highDesc: '你们之间有坚实的信任和承诺基础。高水平的信任和承诺是关系稳定的最终保障 (Blow & Hartnett, 2005)。' }
+];
+
+const questions = [
+  // === 关系满意度 (Spanier, 1976; Kurdek, 2004) ===
+  { text: '我对我们目前的相处方式感到满意。', dim: 'satisfaction', reverse: false },
+  { text: '我们在生活中的重要决定上通常能达成一致。', dim: 'satisfaction', reverse: false },
+  { text: '如果可以重来，我仍然会选择和ta在一起。', dim: 'satisfaction', reverse: false },
+  { text: '我们在一起时，我经常感到快乐和放松。', dim: 'satisfaction', reverse: false },
+  { text: '我对我们的亲密生活感到满足。', dim: 'satisfaction', reverse: false },
+
+  // === 依恋风格 (Brennan et al., 1998; Allen & Baucom, 2004) ===
+  { text: '我有时担心自己在这段关系中付出得比对方多。', dim: 'attachment', reverse: true },
+  { text: '当我遇到困难时，伴侣是我第一个想要倾诉的人。', dim: 'attachment', reverse: false },
+  { text: '表达脆弱或求助对我来说并不容易。', dim: 'attachment', reverse: true },
+  { text: '我能感受到伴侣对我的关心是稳定和持续的。', dim: 'attachment', reverse: false },
+  { text: '在关系中，我偶尔会感到一种不安全的紧张感。', dim: 'attachment', reverse: true },
+
+  // === 关系投入度 (Rusbult, 1983) ===
+  { text: '我们在彼此身上投入了大量只属于我们的共同记忆。', dim: 'investment', reverse: false },
+  { text: '我们的日常生活已经紧密地交织在一起。', dim: 'investment', reverse: false },
+  { text: '我愿意为了我们的关系调整自己的个人计划。', dim: 'investment', reverse: false },
+  { text: '我们之间有很多共同的朋友和社交圈。', dim: 'investment', reverse: false },
+  { text: '如果这段关系结束，我觉得我会失去生活中很重要的一部分。', dim: 'investment', reverse: false },
+
+  // === 替代选择感知 (Rusbult, 1983; Simpson & Gangestad, 1991) ===
+  { text: '我有时会对关系之外认识的某个人产生好奇。', dim: 'alternatives', reverse: true },
+  { text: '我觉得自己即使不在这段关系中，也能拥有充实的生活。', dim: 'alternatives', reverse: true },
+  { text: '在社交活动中，我偶尔会留意到有吸引力的人。', dim: 'alternatives', reverse: true },
+  { text: '我很少去想"如果和别人在一起会怎样"。', dim: 'alternatives', reverse: false },
+  { text: '我身边的社交环境中有比较容易结识新朋友的机会。', dim: 'alternatives', reverse: true },
+
+  // === 沟通质量 (Christensen & Heavey, 1990; Gottman et al., 2003) ===
+  { text: '我们可以平静地讨论让彼此不舒服的话题。', dim: 'communication', reverse: false },
+  { text: '发生分歧后，我们通常能在合理的时间内化解。', dim: 'communication', reverse: false },
+  { text: '有些事情我选择不和伴侣说，因为怕引起争执。', dim: 'communication', reverse: true },
+  { text: '当我表达感受时，我觉得伴侣真的在认真听。', dim: 'communication', reverse: false },
+  { text: '我们的争论有时会变得比较激烈，事后会感到后悔。', dim: 'communication', reverse: true },
+
+  // === 社会支持与少数群体压力 (Meyer, 2003; Rostosky & Riggle, 2017) ===
+  { text: '我的家人对我们的关系持接纳或支持的态度。', dim: 'minority_stress', reverse: false },
+  { text: '在公共场合，我可以自然地表达对伴侣的亲近。', dim: 'minority_stress', reverse: false },
+  { text: '来自社会或周围环境的看法有时会让我感到压力。', dim: 'minority_stress', reverse: true },
+  { text: '我们有可以分享关系问题的朋友或社群。', dim: 'minority_stress', reverse: false },
+  { text: '我有时会因为外界因素而对自己的身份认同产生困扰。', dim: 'minority_stress', reverse: true },
+
+  // === 情感亲密度 (Kurdek, 2004, 2005) ===
+  { text: '我会和伴侣分享我内心深处的想法和感受。', dim: 'intimacy', reverse: false },
+  { text: '在所有人当中，伴侣是最了解真实的我的那个人。', dim: 'intimacy', reverse: false },
+  { text: '我在伴侣面前可以完全卸下防备。', dim: 'intimacy', reverse: false },
+  { text: '我有时觉得我们之间存在一种说不清的距离感。', dim: 'intimacy', reverse: true },
+  { text: '在情感上，我偶尔会更依赖朋友而非伴侣。', dim: 'intimacy', reverse: true },
+
+  // === 关系边界共识 (Hoff & Beougher, 2010) ===
+  { text: '我们曾经认真讨论过对"关系边界"的理解。', dim: 'boundaries', reverse: false },
+  { text: '我清楚哪些社交行为在我们的关系中是可以被接受的。', dim: 'boundaries', reverse: false },
+  { text: '我们对彼此在社交媒体上的互动有默契的共识。', dim: 'boundaries', reverse: false },
+  { text: '我有一些社交上的互动不会主动和伴侣提起。', dim: 'boundaries', reverse: true },
+  { text: '我觉得我们对于什么算"越界"可能有不同的看法。', dim: 'boundaries', reverse: true },
+
+  // === 新奇寻求 / 社会性取向 (Zuckerman, 1994; Simpson & Gangestad, 1991) ===
+  { text: '我天生喜欢探索新鲜事物和新的体验。', dim: 'sensation', reverse: true },
+  { text: '日常生活中的固定模式有时会让我感到沉闷。', dim: 'sensation', reverse: true },
+  { text: '我在网络社交中比较活跃，喜欢认识新的人。', dim: 'sensation', reverse: true },
+  { text: '我认为一段关系并不需要满足一个人的全部需求。', dim: 'sensation', reverse: true },
+  { text: '生活中保持一些属于自己的独立空间对我来说非常重要。', dim: 'sensation', reverse: true },
+
+  // === 信任与承诺 (Blow & Hartnett, 2005; Rusbult, 1983) ===
+  { text: '我对伴侣有充分的信任，即使ta不在身边。', dim: 'trust', reverse: false },
+  { text: '无论遇到什么困难，我都想和伴侣一起面对。', dim: 'trust', reverse: false },
+  { text: '我偶尔会不自觉地留意伴侣的手机或社交动态。', dim: 'trust', reverse: true },
+  { text: '我对我们关系的长远未来抱有信心。', dim: 'trust', reverse: false },
+  { text: '在过去一段时间里，我觉得我们之间的信任发生了一些变化。', dim: 'trust', reverse: true }
+];
+
+// ===== STATE =====
+let currentQ = 0;
+let answers = new Array(questions.length).fill(null);
+
+// ===== FUNCTIONS =====
+function startQuiz() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  const dim = dimensions.find(d => d.id === q.dim);
+
+  document.getElementById('dimLabel').textContent = dim.icon + ' ' + dim.name;
+  document.getElementById('progressCount').textContent = `${currentQ + 1} / ${questions.length}`;
+  document.getElementById('progressFill').style.width = `${((currentQ + 1) / questions.length) * 100}%`;
+
+  document.getElementById('questionNumber').textContent = `第 ${currentQ + 1} 题 · ${dim.name}`;
+  document.getElementById('questionText').textContent = q.text;
+
+  const labels = ['非常不同意', '不太同意', '不确定', '比较同意', '非常同意'];
+  const scale = document.getElementById('likertScale');
+  scale.innerHTML = '';
+
+  for (let i = 1; i <= 5; i++) {
+    const opt = document.createElement('div');
+    opt.className = 'likert-option';
+    opt.innerHTML = `
+      <input type="radio" name="q${currentQ}" id="q${currentQ}_${i}" value="${i}"
+        ${answers[currentQ] === i ? 'checked' : ''}
+        onchange="selectAnswer(${i})">
+      <label for="q${currentQ}_${i}">
+        <span class="num">${i}</span>
+        <span class="lbl">${labels[i-1]}</span>
+      </label>
+    `;
+    scale.appendChild(opt);
+  }
+
+  // Re-trigger animation
+  const card = document.getElementById('questionCard');
+  card.style.animation = 'none';
+  card.offsetHeight; // force reflow
+  card.style.animation = 'slideIn 0.4s ease';
+
+  document.getElementById('btnPrev').style.visibility = currentQ === 0 ? 'hidden' : 'visible';
+  const btnNext = document.getElementById('btnNext');
+  btnNext.disabled = answers[currentQ] === null;
+
+  if (currentQ === questions.length - 1) {
+    btnNext.textContent = '查看结果 →';
+  } else {
+    btnNext.textContent = '下一题 →';
+  }
+}
+
+function selectAnswer(val) {
+  answers[currentQ] = val;
+  document.getElementById('btnNext').disabled = false;
+}
+
+function nextQuestion() {
+  if (answers[currentQ] === null) return;
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showResults();
+  }
+}
+
+function prevQuestion() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function showResults() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  window.scrollTo({ top: 0 });
+
+  // Calculate dimension scores (1-5 scale, higher = more stable/lower risk)
+  const dimScores = {};
+  dimensions.forEach(d => {
+    const qs = questions.map((q, i) => ({ ...q, idx: i })).filter(q => q.dim === d.id);
+    let total = 0;
+    qs.forEach(q => {
+      const raw = answers[q.idx];
+      total += q.reverse ? (6 - raw) : raw;
+    });
+    dimScores[d.id] = total / qs.length;
+  });
+
+  // Overall stability score (0-100)
+  // Weighted: trust and satisfaction weigh more
+  const weights = {
+    satisfaction: 1.3, attachment: 1.1, investment: 1.0, alternatives: 1.2,
+    communication: 1.1, minority_stress: 0.8, intimacy: 1.1, boundaries: 1.0,
+    sensation: 0.7, trust: 1.3
+  };
+  let weightedSum = 0, weightTotal = 0;
+  for (const [k, v] of Object.entries(dimScores)) {
+    weightedSum += v * weights[k];
+    weightTotal += weights[k];
+  }
+  const overallStability = ((weightedSum / weightTotal - 1) / 4) * 100; // 0-100
+  const riskPercent = 100 - overallStability;
+
+  // Determine risk level
+  let riskLabel, riskColor, icon, title, subtitle;
+  if (riskPercent <= 20) {
+    riskLabel = '低风险'; riskColor = '#00B894'; icon = '🛡️';
+    title = '关系稳定性很高'; subtitle = '你们的关系基础非常牢固';
+  } else if (riskPercent <= 40) {
+    riskLabel = '较低风险'; riskColor = '#00CEC9'; icon = '✅';
+    title = '关系整体健康'; subtitle = '有少量值得关注的方面';
+  } else if (riskPercent <= 60) {
+    riskLabel = '中等风险'; riskColor = '#FDCB6E'; icon = '⚠️';
+    title = '存在一些需要注意的信号'; subtitle = '建议关注以下维度的改善';
+  } else if (riskPercent <= 80) {
+    riskLabel = '较高风险'; riskColor = '#E17055'; icon = '🔶';
+    title = '关系稳定性面临挑战'; subtitle = '建议认真对待以下风险因素';
+  } else {
+    riskLabel = '高风险'; riskColor = '#D63031'; icon = '🔴';
+    title = '关系中存在显著的不稳定因素'; subtitle = '强烈建议寻求专业支持';
+  }
+
+  document.getElementById('resultIcon').textContent = icon;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultSubtitle').textContent = subtitle;
+
+  // Score circle animation
+  const scoreNum = document.getElementById('scoreNum');
+  scoreNum.style.color = riskColor;
+  const scoreFill = document.getElementById('scoreFill');
+  scoreFill.style.stroke = riskColor;
+  setTimeout(() => {
+    scoreFill.style.strokeDashoffset = 502 - (502 * overallStability / 100);
+    // Animate number
+    let current = 0;
+    const target = Math.round(overallStability);
+    const interval = setInterval(() => {
+      current++;
+      scoreNum.textContent = current;
+      if (current >= target) clearInterval(interval);
+    }, 15);
+  }, 300);
+
+  const rl = document.getElementById('riskLevel');
+  rl.textContent = riskLabel;
+  rl.style.background = riskColor + '22';
+  rl.style.color = riskColor;
+
+  // Dimension cards
+  const dimContainer = document.getElementById('dimensionResults');
+  dimContainer.innerHTML = '';
+
+  // Sort dimensions by score (worst first)
+  const sortedDims = dimensions.slice().sort((a, b) => dimScores[a.id] - dimScores[b.id]);
+
+  sortedDims.forEach((d, idx) => {
+    const score = dimScores[d.id];
+    const pct = ((score - 1) / 4) * 100;
+    let color;
+    if (pct >= 70) color = '#00B894';
+    else if (pct >= 50) color = '#00CEC9';
+    else if (pct >= 35) color = '#FDCB6E';
+    else color = '#E17055';
+
+    const desc = pct >= 50 ? d.highDesc : d.lowDesc;
+
+    const card = document.createElement('div');
+    card.className = 'dim-card';
+    card.innerHTML = `
+      <div class="dim-header">
+        <h3>${d.icon} ${d.name}</h3>
+        <span class="dim-score-badge" style="background:${color}22;color:${color}">
+          ${Math.round(pct)}分
+        </span>
+      </div>
+      <div class="dim-bar">
+        <div class="dim-bar-fill" id="dimBar${idx}" style="background:${color}"></div>
+      </div>
+      <div class="dim-desc">
+        <strong style="color:${color}">理论依据：</strong>${d.theory}<br>
+        ${desc}
+      </div>
+    `;
+    dimContainer.appendChild(card);
+
+    setTimeout(() => {
+      document.getElementById(`dimBar${idx}`).style.width = `${pct}%`;
+    }, 200 + idx * 100);
+  });
+
+  // Interpretation
+  const interp = document.getElementById('interpretation');
+  const weakDims = sortedDims.filter(d => ((dimScores[d.id] - 1) / 4) * 100 < 50);
+  const strongDims = sortedDims.filter(d => ((dimScores[d.id] - 1) / 4) * 100 >= 70);
+
+  let interpHTML = `<h3>📝 综合解读</h3>`;
+  interpHTML += `<p>你的关系稳定性综合得分为 <strong style="color:${riskColor}">${Math.round(overallStability)}</strong> 分（满分100），整体风险评级为 <strong style="color:${riskColor}">${riskLabel}</strong>。</p>`;
+
+  if (strongDims.length > 0) {
+    interpHTML += `<p><strong>关系优势领域：</strong></p><ul>`;
+    strongDims.forEach(d => {
+      interpHTML += `<li>${d.icon} <strong>${d.name}</strong>：表现良好，是你们关系的有力支撑。</li>`;
+    });
+    interpHTML += `</ul>`;
+  }
+
+  if (weakDims.length > 0) {
+    interpHTML += `<p><strong>需要关注的领域：</strong></p><ul>`;
+    weakDims.forEach(d => {
+      interpHTML += `<li>${d.icon} <strong>${d.name}</strong>：得分较低，建议在这方面进行改善和沟通。</li>`;
+    });
+    interpHTML += `</ul>`;
+  }
+
+  interpHTML += `
+    <p style="margin-top:16px"><strong>重要提示：</strong></p>
+    <p>本评估基于群体层面的统计关联，不能直接预测个体行为。得分反映的是关系中已有研究证实的风险与保护因素的状态，而非对任何具体行为的判定。
+    每段关系都是独特的，许多因素无法被简单量化。如果你在关系中遇到困难，建议寻求专业的伴侣咨询师的支持。</p>
+    <p style="font-size:0.85em;color:rgba(184,184,208,0.5);margin-top:12px">
+      本测评参考的理论框架包括：Rusbult 投资模型 (1983)、Brennan 成人依恋量表 (1998)、
+      Meyer 少数群体压力模型 (2003)、Hoff & Beougher 性协议框架 (2010)、
+      Gottman 同性伴侣关系研究 (2003) 等。详见下方参考文献。
+    </p>
+  `;
+
+  interp.innerHTML = interpHTML;
+}
+
+function restart() {
+  currentQ = 0;
+  answers = new Array(questions.length).fill(null);
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('landing').style.display = 'flex';
+  window.scrollTo({ top: 0 });
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('quiz').style.display !== 'block') return;
+  if (e.key >= '1' && e.key <= '5') {
+    selectAnswer(parseInt(e.key));
+    document.getElementById(`q${currentQ}_${e.key}`).checked = true;
+    // Update label styles
+    document.querySelectorAll(`input[name="q${currentQ}"]`).forEach(inp => {
+      if (inp.checked) inp.nextElementSibling.click();
+    });
+  }
+  if (e.key === 'ArrowRight' || e.key === 'Enter') {
+    if (answers[currentQ] !== null) nextQuestion();
+  }
+  if (e.key === 'ArrowLeft') prevQuestion();
+});
+</script>
+</body>
+</html>
